@@ -10,6 +10,7 @@ import {
 import { CartService } from './cart.service';
 import { CreateCartDto } from './dto/create-cart.dto';
 import { UpdateCartDto } from './dto/update-cart.dto';
+import { AddToCartDto } from './dto/add-to-cart.dto';
 
 @Controller('cart')
 export class CartController {
@@ -21,8 +22,8 @@ export class CartController {
   }
 
   @Post('add')
-  addToCart(@Body() createCartDto: CreateCartDto) {
-    return this.cartService.addToCart(createCartDto);
+  addToCart(@Body() addToCartDto: AddToCartDto) {
+    return this.cartService.addToCart(addToCartDto);
   }
 
   @Get(':userId')

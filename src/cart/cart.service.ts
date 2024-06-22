@@ -1,17 +1,35 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+import { PrismaService } from '../prisma.service';
 import { CreateCartDto } from './dto/create-cart.dto';
 import { UpdateCartDto } from './dto/update-cart.dto';
+import { AddToCartDto } from './dto/add-to-cart.dto';
 
 @Injectable()
 export class CartService {
-  // figure out DTOs
+  constructor(private prisma: PrismaService) {}
+  // TODO: figure out DTOs
 
   create(createCartDto: CreateCartDto) {
     return 'This action adds a new cart';
   }
 
-  addToCart(createCartDto: CreateCartDto) {
-    return "This action adds a product to the user's cart or updates the quantity if the product is already in the cart.";
+  async addToCart(addToCartDto: AddToCartDto) {
+    const { userId, productId, quantity } = addToCartDto;
+
+    const cart = await this.prisma.cart.upsert({
+      where: { userId },
+      update: {},
+      create: { userId },
+    });
+
+    const cartItem = await this.prisma.cartItem.upsert({
+      where: { cartId_productId: { cartId: cart.cartId, productId } },
+      update: { quantity: { increment: quantity } },
+      create: { cartId: cart.cartId, productId, quantity },
+    });
+
+    return cartItem;
   }
 
   viewCart(userId: number) {
