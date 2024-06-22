@@ -3,7 +3,7 @@ import {
   Get,
   Post,
   Body,
-  Patch,
+  Put,
   Param,
   Delete,
 } from '@nestjs/common';
@@ -15,28 +15,30 @@ import { UpdateCartDto } from './dto/update-cart.dto';
 export class CartController {
   constructor(private readonly cartService: CartService) {}
 
-  @Post()
+  @Post('create')
   create(@Body() createCartDto: CreateCartDto) {
     return this.cartService.create(createCartDto);
   }
 
-  @Get()
-  findAll() {
-    return this.cartService.findAll();
+  @Post('add')
+  addToCart(@Body() createCartDto: CreateCartDto) {
+    return this.cartService.addToCart(createCartDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.cartService.findOne(+id);
+  @Get(':userId')
+  viewCart(@Param('userId') userId: string) {
+    return this.cartService.viewCart(+userId);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCartDto: UpdateCartDto) {
-    return this.cartService.update(+id, updateCartDto);
+  // TODO: how to pass the cart id when there is not :id in the endpoint?
+  @Put('update')
+  updateCart(@Body() updateCartDto: UpdateCartDto) {
+    return this.cartService.updateCart(updateCartDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.cartService.remove(+id);
+  // TODO: how to pass the cart id when there is not :id in the endpoint?
+  @Delete('remove')
+  removeFromCart() {
+    return this.cartService.removeFromCart();
   }
 }
