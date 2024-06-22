@@ -1,4 +1,4 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateCartDto } from './create-cart.dto';
-
-export class UpdateCartDto extends PartialType(CreateCartDto) {}
+// TODO: do i need to import from other dtos and make this a partial type?
+export class UpdateCartDto {
+  quantity: number;
+}

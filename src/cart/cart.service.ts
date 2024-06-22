@@ -1,7 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
-import { CreateCartDto } from './dto/create-cart.dto';
 import { UpdateCartDto } from './dto/update-cart.dto';
 import { AddToCartDto } from './dto/add-to-cart.dto';
 
@@ -9,11 +7,11 @@ import { AddToCartDto } from './dto/add-to-cart.dto';
 export class CartService {
   constructor(private prisma: PrismaService) {}
   // TODO: figure out DTOs
+  // TODO: should i first check if the user and the product exists and throw a descriptive error?
 
-  create(createCartDto: CreateCartDto) {
-    return 'This action adds a new cart';
-  }
-
+  // TODO: can't add to cart if the stock is not enough
+  // TODO: should addToCart create a cart if it does not exist?
+  // or should i implement a create function?
   async addToCart(addToCartDto: AddToCartDto) {
     const { userId, productId, quantity } = addToCartDto;
 
@@ -46,11 +44,46 @@ export class CartService {
     });
   }
 
-  updateCart(updateCartDto: UpdateCartDto) {
-    return `This action updates the quantity of a product in the cart`;
+  // TODO: can't update to cart if the stock is not enough
+  // TODO: should PUT create the cartItem if it does not exist?
+  async updateCart(
+    userId: number,
+    productId: number,
+    updateCartDto: UpdateCartDto,
+  ) {
+    const { quantity } = updateCartDto;
+
+    const cart = await this.prisma.cart.findUnique({ where: { userId } });
+
+    if (!cart)
+      throw new NotFoundException(`Cart for user ID ${userId} not found`);
+
+    const cartItem = await this.prisma.cartItem.upsert({
+      where: { cartId_productId: { cartId: cart.cartId, productId } },
+      update: { quantity },
+      create: { cartId: cart.cartId, productId, quantity },
+    });
+
+    return cartItem;
   }
 
-  removeFromCart() {
-    return `This action removes a product from a cart`;
+  async removeFromCart(userId: number, productId: number) {
+    const cart = await this.prisma.cart.findUnique({ where: { userId } });
+
+    if (!cart)
+      throw new NotFoundException(`Cart for user ID ${userId} is not found`);
+
+    const cartItem = await this.prisma.cartItem.findUnique({
+      where: { cartId_productId: { cartId: cart.cartId, productId } },
+    });
+
+    if (!cartItem)
+      throw new NotFoundException(
+        `Product ID ${productId} for user ID ${userId} is not found`,
+      );
+
+    return this.prisma.cartItem.delete({
+      where: { cartId_productId: { cartId: cart.cartId, productId } },
+    });
   }
 }
