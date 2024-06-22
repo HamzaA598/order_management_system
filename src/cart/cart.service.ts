@@ -32,8 +32,18 @@ export class CartService {
     return cartItem;
   }
 
-  viewCart(userId: number) {
-    return `This action retrieves a #${userId} cart`;
+  // TODO: up to which level of detail? should i display product info?
+  async viewCart(userId: number) {
+    return this.prisma.cart.findUnique({
+      where: { userId },
+      include: {
+        cartItems: {
+          // include: {
+          //   product: true,
+          // },
+        },
+      },
+    });
   }
 
   updateCart(updateCartDto: UpdateCartDto) {
