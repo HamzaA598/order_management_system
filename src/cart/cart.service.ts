@@ -30,15 +30,14 @@ export class CartService {
     return cartItem;
   }
 
-  // TODO: up to which level of detail? should i display product info?
   async viewCart(userId: number) {
     return this.prisma.cart.findUnique({
       where: { userId },
       include: {
         cartItems: {
-          // include: {
-          //   product: true,
-          // },
+          include: {
+            product: true,
+          },
         },
       },
     });
