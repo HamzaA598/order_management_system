@@ -30,6 +30,7 @@ export class CartService {
     return cartItem;
   }
 
+  // TODO: userId or cartId?
   async viewCart(userId: number) {
     return this.prisma.cart.findUnique({
       where: { userId },
@@ -45,17 +46,15 @@ export class CartService {
 
   // TODO: can't update to cart if the stock is not enough
   // TODO: should PUT create the cartItem if it does not exist?
-  async updateCart(
-    userId: number,
-    productId: number,
-    updateCartDto: UpdateCartDto,
-  ) {
-    const { quantity } = updateCartDto;
+  async updateCart(cartId: number, updateCartDto: UpdateCartDto) {
+    const { productId, quantity } = updateCartDto;
 
-    const cart = await this.prisma.cart.findUnique({ where: { userId } });
+    const cart = await this.prisma.cart.findUnique({
+      where: { cartId: cartId },
+    });
 
     if (!cart)
-      throw new NotFoundException(`Cart for user ID ${userId} not found`);
+      throw new NotFoundException(`Cart for user ID ${cartId} not found`);
 
     const cartItem = await this.prisma.cartItem.upsert({
       where: { cartId_productId: { cartId: cart.cartId, productId } },
