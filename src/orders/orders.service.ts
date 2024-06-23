@@ -79,8 +79,17 @@ export class OrdersService {
     return pricedOrder;
   }
 
-  viewOrder(id: number) {
-    return `This action returns a #${id} order`;
+  viewOrder(orderId: number) {
+    return this.prisma.order.findUnique({
+      where: { orderId: orderId },
+      include: {
+        orderItems: {
+          include: {
+            product: true,
+          },
+        },
+      },
+    });
   }
 
   updateStatus(id: number, updateOrderDto: UpdateOrderDto) {
