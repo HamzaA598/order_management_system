@@ -20,9 +20,9 @@ export class CartController {
     return this.cartService.addToCart(addToCartDto);
   }
 
-  @Get(':cartId')
-  viewCart(@Param('cartId') cartId: string) {
-    return this.cartService.viewCart(+cartId);
+  @Get(':userId')
+  viewCart(@Param('userId') userId: string) {
+    return this.cartService.viewCart(+userId);
   }
 
   // TODO: how to pass the cart id when there is not :id in the endpoint?
