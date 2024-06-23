@@ -30,6 +30,7 @@ export class OrdersService {
       where: {
         cartId: cartId,
       },
+      include: { product: true },
     });
 
     // TODO: descriptive exception
@@ -56,13 +57,26 @@ export class OrdersService {
       data: cartItemsData,
     });
 
+    // calculate total price
+    // TODO: update total price on adding every product to cart?
+    const totalPrice = cartItems.reduce((total, item) => {
+      return total + item.quantity * item.product.price;
+    }, 0);
+
+    const pricedOrder = await this.prisma.order.update({
+      where: { orderId: order.orderId },
+      data: {
+        totalPrice: totalPrice,
+      },
+    });
+
     // TODO: should i clear cart after creating an order?
     // clear cart
     await this.prisma.cartItem.deleteMany({
       where: { cartId: cartId },
     });
 
-    return order;
+    return pricedOrder;
   }
 
   viewOrder(id: number) {
