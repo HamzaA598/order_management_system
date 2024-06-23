@@ -92,7 +92,12 @@ export class OrdersService {
     });
   }
 
-  updateStatus(id: number, updateOrderDto: UpdateOrderDto) {
-    return `This action updates a #${id} order`;
+  async updateOrderStatus(orderId: number, updateOrderDto: UpdateOrderDto) {
+    const { status } = updateOrderDto;
+    console.log(status);
+    return await this.prisma.order.update({
+      where: { orderId: orderId },
+      data: { status: status },
+    });
   }
 }

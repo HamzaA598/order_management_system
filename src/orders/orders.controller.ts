@@ -20,11 +20,11 @@ export class OrdersController {
     return this.ordersService.viewOrder(+orderId);
   }
 
-  @Put(':id')
-  updateStatus(
-    @Param('id') id: string,
+  @Put(':orderId/status')
+  updateOrderStatus(
+    @Param('orderId') orderId: string,
     @Body() updateOrderDto: UpdateOrderDto,
   ) {
-    return this.ordersService.updateStatus(+id, updateOrderDto);
+    return this.ordersService.updateOrderStatus(+orderId, updateOrderDto);
   }
 }
