@@ -31,9 +31,9 @@ export class CartService {
   }
 
   // TODO: userId or cartId?
-  async viewCart(userId: number) {
+  async viewCart(cartId: number) {
     return this.prisma.cart.findUnique({
-      where: { userId },
+      where: { cartId: cartId },
       include: {
         cartItems: {
           include: {
