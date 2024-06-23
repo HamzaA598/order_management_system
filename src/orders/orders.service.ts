@@ -7,11 +7,11 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 export class OrdersService {
   constructor(private prisma: PrismaService) {}
 
-  // TODO: i need the user id, maybe the cart id too
-  // TODO: user id is a query parameter?
+  // TODO: should i also pass the cart id in the body?
+  // TODO: user id is a query parameter or in the body?
   // TODO: set default value to status, do not send it in request body
-  async createOrder(userId: number, createOrderDto: CreateOrderDto) {
-    const { status } = createOrderDto;
+  async createOrder(createOrderDto: CreateOrderDto) {
+    const { userId, status } = createOrderDto;
 
     // get user cart
     const cart = await this.prisma.cart.findUnique({
@@ -70,8 +70,7 @@ export class OrdersService {
       },
     });
 
-    // TODO: should i clear cart after creating an order?
-    // clear cart
+    // clear current cart
     await this.prisma.cartItem.deleteMany({
       where: { cartId: cartId },
     });
