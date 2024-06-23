@@ -6,12 +6,10 @@ import { AddToCartDto } from './dto/add-to-cart.dto';
 @Injectable()
 export class CartService {
   constructor(private prisma: PrismaService) {}
-  // TODO: figure out DTOs
   // TODO: should i first check if the user and the product exists and throw a descriptive error?
 
   // TODO: can't add to cart if the stock is not enough
-  // TODO: should addToCart create a cart if it does not exist?
-  // or should i implement a create function?
+  // creates a cart if it does not exist
   async addToCart(addToCartDto: AddToCartDto) {
     const { userId, productId, quantity } = addToCartDto;
 
@@ -30,7 +28,6 @@ export class CartService {
     return cartItem;
   }
 
-  // TODO: userId or cartId?
   async viewCart(cartId: number) {
     return this.prisma.cart.findUnique({
       where: { cartId: cartId },
@@ -65,23 +62,25 @@ export class CartService {
     return cartItem;
   }
 
-  async removeFromCart(userId: number, productId: number) {
-    const cart = await this.prisma.cart.findUnique({ where: { userId } });
+  async removeFromCart(cartId: number, productId: number) {
+    const cart = await this.prisma.cart.findUnique({
+      where: { cartId: cartId },
+    });
 
-    if (!cart)
-      throw new NotFoundException(`Cart for user ID ${userId} is not found`);
+    if (!cart) throw new NotFoundException(`Cart ${cartId} is not found`);
 
     const cartItem = await this.prisma.cartItem.findUnique({
-      where: { cartId_productId: { cartId: cart.cartId, productId } },
+      where: { cartId_productId: { cartId: cartId, productId: productId } },
     });
 
     if (!cartItem)
       throw new NotFoundException(
-        `Product ID ${productId} for user ID ${userId} is not found`,
+        `Product ID ${productId} for cart ID ${cartId} is not found`,
       );
 
     return this.prisma.cartItem.delete({
-      where: { cartId_productId: { cartId: cart.cartId, productId } },
+      where: { cartId_productId: { cartId: cartId, productId: productId } },
+      include: { product: true },
     });
   }
 }

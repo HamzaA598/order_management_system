@@ -37,11 +37,11 @@ export class CartController {
 
   // TODO: how to pass the cart id when there is not :id in the endpoint?
   // should i pass userId and productId in the url or in the body?
-  @Delete('remove/:userId/:productId')
+  @Delete('remove/:cartId/:productId')
   removeFromCart(
-    @Param('userId') userId: string,
+    @Param('cartId') cartId: string,
     @Param('productId') productId: string,
   ) {
-    return this.cartService.removeFromCart(+userId, +productId);
+    return this.cartService.removeFromCart(+cartId, +productId);
   }
 }
