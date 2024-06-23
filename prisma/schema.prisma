@@ -38,7 +38,7 @@ model Order {
   userId    Int
   orderDate DateTime @default(now())
   status    String
-  discountPercentage Float
+  discountPercentage Float @default(0)
   user      User     @relation(fields: [userId], references: [userId])
   orderItems OrderItem[]
 }
