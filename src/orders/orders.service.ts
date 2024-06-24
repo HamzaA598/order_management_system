@@ -18,24 +18,11 @@ export class OrdersService {
       where: {
         userId: userId,
       },
+      include: { cartItems: { include: { product: true } } },
     });
 
-    if (!cart)
-      throw new NotFoundException(`Cart for user ID ${userId} not found`);
-
-    const cartId: number = cart.cartId;
-
-    // get cartItems from cart
-    const cartItems = await this.prisma.cartItem.findMany({
-      where: {
-        cartId: cartId,
-      },
-      include: { product: true },
-    });
-
-    // TODO: descriptive exception
-    if (cartItems.length === 0)
-      throw new NotFoundException("can't create an order with an empty cart");
+    if (!cart || cart.cartItems.length === 0)
+      throw new NotFoundException(`Cart for user ID ${userId} is empty`);
 
     // save order
     const order = await this.prisma.order.create({
@@ -46,7 +33,7 @@ export class OrdersService {
     });
 
     // Prepare data for insertion
-    const cartItemsData = cartItems.map((item) => ({
+    const cartItemsData = cart.cartItems.map((item) => ({
       orderId: order.orderId,
       productId: item.productId,
       quantity: item.quantity,
@@ -59,7 +46,7 @@ export class OrdersService {
 
     // calculate total price
     // TODO: update total price on adding every product to cart?
-    const totalPrice = cartItems.reduce((total, item) => {
+    const totalPrice = cart.cartItems.reduce((total, item) => {
       return total + item.quantity * item.product.price;
     }, 0);
 
@@ -68,18 +55,19 @@ export class OrdersService {
       data: {
         totalPrice: totalPrice,
       },
+      include: { orderItems: { include: { product: true } } },
     });
 
     // clear current cart
     await this.prisma.cartItem.deleteMany({
-      where: { cartId: cartId },
+      where: { cartId: cart.cartId },
     });
 
     return pricedOrder;
   }
 
-  viewOrder(orderId: number) {
-    return this.prisma.order.findUnique({
+  async viewOrder(orderId: number) {
+    const order = await this.prisma.order.findUnique({
       where: { orderId: orderId },
       include: {
         orderItems: {
@@ -89,14 +77,27 @@ export class OrdersService {
         },
       },
     });
+
+    if (!order)
+      throw new NotFoundException(`Order with ID ${orderId} not found`);
+
+    return order;
   }
 
   async updateOrderStatus(orderId: number, updateOrderDto: UpdateOrderDto) {
     const { status } = updateOrderDto;
-    console.log(status);
+
+    const order = await this.prisma.order.findUnique({
+      where: { orderId: orderId },
+    });
+
+    if (!order)
+      throw new NotFoundException(`Order with ID ${orderId} not found`);
+
     return await this.prisma.order.update({
       where: { orderId: orderId },
       data: { status: status },
+      include: { orderItems: { include: { product: true } } },
     });
   }
 }
