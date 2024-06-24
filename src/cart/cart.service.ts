@@ -9,23 +9,26 @@ export class CartService {
   // TODO: should i first check if the user and the product exists and throw a descriptive error?
 
   // TODO: can't add to cart if the stock is not enough
-  // creates a cart if it does not exist
   async addToCart(addToCartDto: AddToCartDto) {
     const { userId, productId, quantity } = addToCartDto;
 
+    // create a cart if it does not exist
     const cart = await this.prisma.cart.upsert({
       where: { userId },
       update: {},
       create: { userId },
     });
 
-    const cartItem = await this.prisma.cartItem.upsert({
+    await this.prisma.cartItem.upsert({
       where: { cartId_productId: { cartId: cart.cartId, productId } },
-      update: { quantity: { increment: quantity } },
+      update: { quantity: quantity },
       create: { cartId: cart.cartId, productId, quantity },
     });
 
-    return cartItem;
+    return await this.prisma.cart.findUnique({
+      where: { cartId: cart.cartId },
+      include: { cartItems: { include: { product: true } } },
+    });
   }
 
   async viewCart(userId: number) {
@@ -53,13 +56,16 @@ export class CartService {
     if (!cart)
       throw new NotFoundException(`Cart for user ID ${cartId} not found`);
 
-    const cartItem = await this.prisma.cartItem.upsert({
+    await this.prisma.cartItem.upsert({
       where: { cartId_productId: { cartId: cart.cartId, productId } },
       update: { quantity },
       create: { cartId: cart.cartId, productId, quantity },
     });
 
-    return cartItem;
+    return await this.prisma.cart.findUnique({
+      where: { cartId: cart.cartId },
+      include: { cartItems: { include: { product: true } } },
+    });
   }
 
   async removeFromCart(cartId: number, productId: number) {
@@ -78,9 +84,14 @@ export class CartService {
         `Product ID ${productId} for cart ID ${cartId} is not found`,
       );
 
-    return this.prisma.cartItem.delete({
+    await this.prisma.cartItem.delete({
       where: { cartId_productId: { cartId: cartId, productId: productId } },
       include: { product: true },
+    });
+
+    return await this.prisma.cart.findUnique({
+      where: { cartId: cartId },
+      include: { cartItems: { include: { product: true } } },
     });
   }
 }
