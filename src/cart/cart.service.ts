@@ -32,7 +32,7 @@ export class CartService {
   }
 
   async viewCart(userId: number) {
-    return this.prisma.cart.findUnique({
+    const cart = await this.prisma.cart.findUnique({
       where: { userId: userId },
       include: {
         cartItems: {
@@ -42,6 +42,11 @@ export class CartService {
         },
       },
     });
+
+    if (!cart || cart.cartItems.length === 0)
+      throw new NotFoundException(`Cart for user ID ${userId} is empty`);
+
+    return cart;
   }
 
   // TODO: can't update to cart if the stock is not enough
@@ -54,7 +59,7 @@ export class CartService {
     });
 
     if (!cart)
-      throw new NotFoundException(`Cart for user ID ${cartId} not found`);
+      throw new NotFoundException(`Cart for user ID ${cartId} is empty`);
 
     await this.prisma.cartItem.upsert({
       where: { cartId_productId: { cartId: cart.cartId, productId } },
@@ -73,7 +78,7 @@ export class CartService {
       where: { cartId: cartId },
     });
 
-    if (!cart) throw new NotFoundException(`Cart ${cartId} is not found`);
+    if (!cart) throw new NotFoundException(`Cart ${cartId} is empty`);
 
     const cartItem = await this.prisma.cartItem.findUnique({
       where: { cartId_productId: { cartId: cartId, productId: productId } },

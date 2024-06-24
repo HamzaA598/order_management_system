@@ -51,6 +51,10 @@ export class CartController {
     description: "The user's cart",
     type: Cart,
   })
+  @ApiResponse({
+    status: 404,
+    description: 'cart is empty',
+  })
   @Get(':userId')
   viewCart(@Param('userId') userId: string) {
     return this.cartService.viewCart(+userId);
@@ -69,7 +73,7 @@ export class CartController {
     description: 'The cart after updating the product',
     type: Cart,
   })
-  @ApiResponse({ status: 404, description: 'Cart not found' })
+  @ApiResponse({ status: 404, description: 'Cart is empty' })
   @Put('update/:cartId')
   updateCart(
     @Param('cartId') cartId: string,
@@ -94,8 +98,10 @@ export class CartController {
     description: 'The cart after removing the product',
     type: Cart,
   })
-  @ApiResponse({ status: 404, description: 'Cart not found' })
-  @ApiResponse({ status: 404, description: 'Product is not found inside cart' })
+  @ApiResponse({
+    status: 404,
+    description: 'Cart not found/Product is not found inside cart',
+  })
   @Delete('remove/:cartId/:productId')
   removeFromCart(
     @Param('cartId') cartId: string,
