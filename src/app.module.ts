@@ -5,9 +5,18 @@ import { OrdersModule } from './orders/orders.module';
 import { CartModule } from './cart/cart.module';
 import { UsersModule } from './users/users.module';
 import { ProductsModule } from './products/products.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [OrdersModule, CartModule, UsersModule, ProductsModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    OrdersModule,
+    CartModule,
+    UsersModule,
+    ProductsModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
