@@ -94,15 +94,17 @@ Before you begin, ensure you have the following installed:
        DATABASE_URL=postgresql://postgres:postgres@localhost:5432/order_management_system_db?schema=public
        ```
 
-4.  Generate Prisma Client
-    Generate the Prisma client based on the schema:
+4.  Generate Prisma Client:
+
+    Generate the Prisma client based on the schema
 
     ```bash
     npx prisma generate
     ```
 
-5.  Run Database Migrations
-    Apply the database migrations to set up the database schema:
+5.  Run Database Migrations:
+
+    Apply the database migrations to set up the database schema
 
     ```bash
     npx prisma migrate dev
@@ -116,7 +118,7 @@ Before you begin, ensure you have the following installed:
     npm run start:dev
     ```
 
-The NestJS application will be running at http://localhost:3000. You can see the documentation of the endpoints at http://localhost:3000/api. You can access the application endpoints using any API client (e.g., Postman, Thunder Client, curl).
+    The NestJS application will be running at http://localhost:3000. You can see the documentation of the endpoints at http://localhost:3000/api. You can access the application endpoints using any API client (e.g., Postman, Thunder Client, curl).
 
 ## Contributing
 
