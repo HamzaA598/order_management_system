@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { PrismaService } from '../prisma.service';
 
@@ -22,6 +22,12 @@ export class UsersService {
   }
 
   async remove(userId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { userId: userId },
+    });
+
+    if (!user) throw new NotFoundException(`User ${userId} is not found`);
+
     return await this.prisma.user.delete({
       where: { userId: userId },
     });
